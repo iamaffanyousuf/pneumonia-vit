@@ -1,0 +1,22 @@
+# configs/config.yaml
+
+data:
+  train_dir: "data/raw/train"
+  val_dir: "data/raw/val"
+  test_dir: "data/raw/test"
+
+  img_size: 224
+  batch_size: 16
+  num_workers: 4
+
+model:
+  name: "vit_base_patch16_224"
+  num_classes: 2
+  pretrained: true
+
+train:
+  epochs: 15
+  lr: 3e-5
+  weight_decay: 0.01
+
+device: "cuda" # change to "cpu" if no GPU
