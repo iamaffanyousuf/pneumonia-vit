@@ -1,5 +1,3 @@
-import os
-import json
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
@@ -15,8 +13,7 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
     total_loss = 0
 
     for images, labels in tqdm(loader):
-        images = images.to(device, non_blocking=True)
-        labels = labels.to(device, non_blocking=True)
+        images, labels = images.to(device), labels.to(device)
 
         optimizer.zero_grad()
         outputs = model(images)
@@ -38,8 +35,7 @@ def validate(model, loader, criterion, device):
 
     with torch.no_grad():
         for images, labels in loader:
-            images = images.to(device, non_blocking=True)
-            labels = labels.to(device, non_blocking=True)
+            images, labels = images.to(device), labels.to(device)
 
             outputs = model(images)
             loss = criterion(outputs, labels)
@@ -66,10 +62,6 @@ def main():
     criterion = nn.CrossEntropyLoss()
     optimizer = AdamW(model.parameters(), lr=float(config["train"]["lr"]))
 
-    # 🔥 Save directory (Colab + local safe)
-    SAVE_DIR = config.get("save_dir", "outputs")
-    os.makedirs(SAVE_DIR, exist_ok=True)
-
     best_acc = 0
 
     for epoch in range(config["train"]["epochs"]):
@@ -81,27 +73,11 @@ def main():
         print(f"Train Loss: {train_loss:.4f}")
         print(f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
 
-        # ✅ Save LAST model
-        last_path = os.path.join(SAVE_DIR, "last_model.pth")
-        torch.save(model.state_dict(), last_path)
-
-        # ✅ Save BEST model
+        # Save best model
         if val_acc > best_acc:
             best_acc = val_acc
-            best_path = os.path.join(SAVE_DIR, "best_model.pth")
-            torch.save(model.state_dict(), best_path)
-            print(f"✅ Best model saved at {best_path}")
-
-        # ✅ Save logs
-        log_data = {
-            "epoch": epoch + 1,
-            "train_loss": train_loss,
-            "val_loss": val_loss,
-            "val_acc": val_acc,
-        }
-
-        with open(os.path.join(SAVE_DIR, "log.json"), "a") as f:
-            f.write(json.dumps(log_data) + "\n")
+            torch.save(model.state_dict(), "best_model.pth")
+            print("✅ Best model saved")
 
 
 if __name__ == "__main__":

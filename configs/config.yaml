@@ -1,5 +1,7 @@
 # configs/config.yaml
 
+save_dir: "/content/drive/MyDrive/pneumonia-vit"
+
 data:
   train_dir: "data/raw/train"
   val_dir: "data/raw/val"
