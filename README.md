@@ -1,5 +1,4 @@
 ---
----
 title: Pneumonia Detection AI
 emoji: 🫁
 colorFrom: blue
