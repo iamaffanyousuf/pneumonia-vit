@@ -1,7 +1,5 @@
 # configs/config.yaml
 
-save_dir: "/content/drive/MyDrive/pneumonia-vit"
-
 data:
   train_dir: "data/raw/train"
   val_dir: "data/raw/val"
@@ -9,7 +7,9 @@ data:
 
   img_size: 224
   batch_size: 16
-  num_workers: 4
+  num_workers: 2
+
+save_dir: "/content/drive/MyDrive/pneumonia-vit"
 
 model:
   name: "vit_base_patch16_224"
@@ -18,7 +18,7 @@ model:
 
 train:
   epochs: 15
-  lr: 3e-5
+  lr: 0.00001
   weight_decay: 0.01
-
+  lr: 0.00001
 device: "cuda" # change to "cpu" if no GPU

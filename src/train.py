@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from torch.optim import AdamW
 from tqdm import tqdm
+from collections import Counter
 
 from utils import load_config
 from dataset import get_dataloaders
@@ -63,14 +64,31 @@ def main():
 
     model = get_model(config).to(device)
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = AdamW(model.parameters(), lr=float(config["train"]["lr"]))
+    # imbalance fix
+    labels = train_loader.dataset.targets
+    class_counts = Counter(labels)
 
-    # 🔥 Save directory (Colab + local safe)
+    total = sum(class_counts.values())
+
+    num_classes = len(class_counts)
+    weights = [total / class_counts.get(i, 1) for i in range(num_classes)]
+    weights = torch.tensor(weights, dtype=torch.float).to(device)
+
+    criterion = nn.CrossEntropyLoss(weight=weights)
+
+    optimizer = AdamW(
+        model.parameters(),
+        lr=float(config["train"]["lr"]),
+        weight_decay=config["train"].get("weight_decay", 0.01),
+    )
+
+    # Save directory (Colab + local safe)
     SAVE_DIR = config.get("save_dir", "outputs")
     os.makedirs(SAVE_DIR, exist_ok=True)
 
     best_acc = 0
+    patience = 3
+    no_improve = 0
 
     for epoch in range(config["train"]["epochs"]):
         print(f"\nEpoch {epoch + 1}/{config['train']['epochs']}")
@@ -81,18 +99,26 @@ def main():
         print(f"Train Loss: {train_loss:.4f}")
         print(f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
 
-        # ✅ Save LAST model
+        # Save LAST model
         last_path = os.path.join(SAVE_DIR, "last_model.pth")
         torch.save(model.state_dict(), last_path)
 
-        # ✅ Save BEST model
+        # Save BEST model
         if val_acc > best_acc:
             best_acc = val_acc
+            no_improve = 0
+
             best_path = os.path.join(SAVE_DIR, "best_model.pth")
             torch.save(model.state_dict(), best_path)
             print(f"✅ Best model saved at {best_path}")
+        else:
+            no_improve += 1
 
-        # ✅ Save logs
+        if no_improve >= patience:
+            print(f"Early stopping at epoch {epoch + 1}")
+            break
+
+        # Save logs
         log_data = {
             "epoch": epoch + 1,
             "train_loss": train_loss,
