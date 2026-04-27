@@ -87,7 +87,7 @@ def main():
     os.makedirs(SAVE_DIR, exist_ok=True)
 
     best_acc = 0
-    patience = 3
+    patience = 5
     no_improve = 0
 
     for epoch in range(config["train"]["epochs"]):
