@@ -1,7 +1,8 @@
 torch
 torchvision
 timm
-gradio
 Pillow
 pyyaml
-huggingface_hub
+
+gradio==4.44.0
+huggingface_hub==0.23.5
