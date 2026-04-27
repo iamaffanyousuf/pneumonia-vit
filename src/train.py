@@ -71,7 +71,7 @@ def main():
     total = sum(class_counts.values())
 
     num_classes = len(class_counts)
-    weights = [total / class_counts.get(i, 1) for i in range(num_classes)]
+    weights = [1.0 / class_counts.get(i, 1) for i in range(num_classes)]
     weights = torch.tensor(weights, dtype=torch.float).to(device)
 
     criterion = nn.CrossEntropyLoss(weight=weights)
@@ -104,7 +104,7 @@ def main():
         torch.save(model.state_dict(), last_path)
 
         # Save BEST model
-        if val_acc > best_acc:
+        if val_acc >= best_acc:
             best_acc = val_acc
             no_improve = 0
 
