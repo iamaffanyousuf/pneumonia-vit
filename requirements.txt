@@ -1,5 +1,7 @@
 torch
 torchvision
 timm
-tqdm
+gradio
+Pillow
 pyyaml
+huggingface_hub
